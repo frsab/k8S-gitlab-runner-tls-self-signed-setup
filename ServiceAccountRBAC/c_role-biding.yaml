@@ -1,0 +1,16 @@
+# Définition de lier ce rôle à un service account spécifique
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ns-gr-role-binding  # Nom de l'association entre le rôle et le service account
+  namespace: ns-gr          # Namespace où ce binding sera appliqué
+subjects:
+  # Liste des sujets (utilisateurs, groupes ou service accounts) auxquels ce rôle sera appliqué
+  - kind: ServiceAccount            # Le type de sujet ici est un service account
+    name: ns-gr-service-account            # Nom du service account que GitLab Runner utilisera
+    namespace: ns-gr        # Namespace où ce service account existe
+roleRef:
+  # Cette section indique quel rôle (Role) est attribué au service account
+  kind: Role                        # Nous faisons référence à un "Role", pas un "ClusterRole"
+  name: ns-gr-role          # Nom du rôle que nous avons défini précédemment
+  apiGroup: rbac.authorization.k8s.io  # Le groupe API pour les rôles RBAC

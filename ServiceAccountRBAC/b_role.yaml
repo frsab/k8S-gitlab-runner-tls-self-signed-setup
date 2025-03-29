@@ -1,0 +1,22 @@
+# Définition du rôle (Role) dans le namespace ns-gr
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: ns-gr  # Nom du namespace dans lequel GitLab Runner est déployé
+  name: ns-gr-role  # Nom du rôle que nous définissons
+rules:
+  # Cette section définit les règles d'accès pour le rôle
+  - apiGroups: [""]
+    # apiGroups: "" fait référence à l'API de base de Kubernetes (pas une API personnalisée)
+    resources: ["pods", "pods/exec", "pods/log", "pods/attach", "services", "configmaps", "secrets","persistentvolumeclaims"]             
+  
+       # Liste des ressources que ce rôle peut gérer
+      #- pods                 # Permet d'interagir avec les pods
+      #- pods/exec            # Permet d'exécuter des commandes dans les pods
+      #- pods/log             # Permet de lire les logs des pods
+      #- services             # Permet de gérer les services
+      #- configmaps           # Permet de gérer les ConfigMaps
+      #- secrets              # Permet de gérer les Secrets
+      #- persistentvolumeclaims # Permet de gérer les PVC (Claims de volumes persistants)
+  # Liste des actions autorisées pour chaque ressource
+    verbs:   ["get", "list", "create", "delete", "patch", "update"]    

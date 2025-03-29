@@ -1,0 +1,161 @@
+image:
+  registry: registry.gitlab.com
+  repository: gitlab-org/gitlab-runner
+  # tag: "17.7.0"
+  # pullPolicy: IfNotPresent
+replicas: 1
+gitlabUrl: https://192.168.1.76:9988/
+gitlabRunner:
+  tlsVerify: false
+  image:
+    tag: "17.7.0"
+runnerToken: "L3cKXUo4U_iuV7pnEev8"
+serviceAccount:
+  create: false
+  name: "gitlab-runner"
+# gitlab-runner:
+#   securityContext:
+#     runAsUser: 1000
+#     runAsGroup: 1000
+#     fsGroup: 1000
+#   containerSecurityContext:
+#     privileged: true
+#   volumes:
+#     - name: config-map-gitlab-certificate
+#       configMap:
+#         name: config-map-gitlab-certificate
+#         items:
+#           - key: gitlab.crt
+#             path: gitlab.crt
+#   volumeMounts:
+#     - name: config-map-gitlab-certificate
+#       mountPath: /etc/gitlab-runner/certs/
+#       readOnly: false
+# initContainers:
+#   - name: fix-permissions
+#     image: alpine
+#     command: ["sh", "-c", "chmod -R 777 /etc/gitlab-runner/certs"]
+#     volumeMounts:
+#       - name: config-map-gitlab-certificate
+#         mountPath: /etc/gitlab-runner/certs
+        # gitlab-runner:
+        #   securityContext:
+        #     runAsUser: 1000
+        #     runAsGroup: 0
+        #     fsGroup: 1000
+        #   containerSecurityContext:
+        #     privileged: true
+        #   volumes:
+        #     - name: config-map-gitlab-certificate
+        #       configMap:
+        #         name: config-map-gitlab-certificate
+        #         items:
+        #           - key: gitlab.crt
+        #             path: gitlab.crt
+        #   volumeMounts:
+        #     - name: config-map-gitlab-certificate
+        #       mountPath: /etc/gitlab-runner/certs
+        #       readOnly: true
+gitlab-runner:
+  volumes:
+    - name: gitlab-ca-cert
+      secret:
+        secretName: gitlab-ca-cert
+  volumeMounts:
+    - name: config-map-gitlab-certificate
+      mountPath: /etc/gitlab-runner/certs/
+      readOnly: true
+
+runners:
+  # config: |
+  #   [[runners]]
+  #     name = "my-runner"
+  #     url = "https://192.168.1.76:9988/"
+  #     token = "L3cKXUo4U_iuV7pnEev8"
+  #     tls-ca-file = "/etc/gitlab-runner/certs/gitlab.crt"
+  #     executor = "kubernetes"
+  #     [runners.kubernetes]
+  #       namespace = "{{.Release.Namespace}}"
+  #       privileged = true
+  #       [runners.kubernetes.volumes]
+  #         [[runners.kubernetes.volumes.config_map]]
+  #           name = "config-map-gitlab-certificate"
+  #           mount_path = "/etc/gitlab-runner/certs"
+  #           read_only = true
+
+  config: |
+    [[runners]]
+      name = "my-runner"
+      url = "https://192.168.1.76:9988/"
+      token = "L3cKXUo4U_iuV7pnEev8"
+      tls-ca-file = "/etc/gitlab-runner/certs/gitlab.crt"
+      executor = "kubernetes"
+      [runners.kubernetes]
+        namespace = "{{.Release.Namespace}}"
+        privileged = true
+        securityContext:
+          runAsUser = 1000
+          runAsGroup = 1000
+          fsGroup = 1000
+        volumes:
+          - name: config-map-gitlab-certificate
+            defaultMode: 0777
+            configMap:
+              name: config-map-gitlab-certificate
+        volumeMounts:
+          - name: config-map-gitlab-certificate
+            mountPath: /etc/gitlab-runner/certs
+            readOnly: true
+livenessProbe:
+  exec:
+    command:
+      - "pgrep"
+      - "gitlab-runner"  # Vérifier si le processus gitlab-runner est en cours
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  failureThreshold: 10
+readinessProbe:
+  exec:
+    command:
+      - "pgrep"
+      - "gitlab-runner"  # Vérifier si le processus gitlab-runner est prêt
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  failureThreshold: 10
+
+# initContainers:
+#   - name: fix-permissions
+#     image: alpine
+#     command: ["sh", "-c", "chmod -R 777 /etc/gitlab-runner"]
+#     volumeMounts:
+#     - name: config-map-gitlab-certificate
+#       mountPath: /etc/gitlab-runner/
+# runners:
+#   config: |
+#     [[runners]]
+#       tls-ca-file = "/etc/gitlab-runner/certs/gitlab.crt"
+#     [runners.custom_build_dir]
+#       enabled = false
+#     [runners.cache]
+#       [runners.cache.s3]
+#       [runners.cache.gcs]
+# runners:
+#   config: |
+#     [[runners]]
+#       name = "k8s-runner"
+#       url = "https://gitlab.optiplex3060:9988/"
+#       token = "L3cKXUo4U_iuV7pnEev8"
+#       executor = "kubernetes"
+#       [runners.kubernetes]
+#         namespace = "gitlab-runner"
+#         image = "alpine"
+# certsSecret:
+#   create: false
+#   secretName: gitlab-runner-certs
+# resources:
+#   requests:
+#     cpu: "250m"
+#     memory: "512Mi"
+#   limits:
+#     cpu: "500m"
+#     memory: "1Gi"

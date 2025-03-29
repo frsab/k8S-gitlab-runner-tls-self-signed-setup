@@ -1,0 +1,136 @@
+image:
+  registry: registry.gitlab.com
+  image: gitlab-org/gitlab-runner
+  tag: alpine-v17.7.0
+gitlabRunner:
+  image: "gitlab/gitlab-runner:17.7.0"
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+  extraVolumes:
+    - name: gitlab-ca-tls
+      secret:
+        secretName: gr-ca-tls-secret
+        items:
+          - key: tls.crt
+            path: ca.crt
+  extraVolumeMounts:
+    - name: gitlab-ca-tls
+      mountPath: /home/gitlab-runner/
+      readOnly: true
+
+      # [runners.custom]
+      #   tls-ca-file = "/home/gitlab-runner/certs/ca.crt"
+  config: |
+    [[runners]]
+      [runners.kubernetes]
+        image = "ubuntu:20.04"
+        privileged = true
+        [[runners.kubernetes.volumes.empty_dir]]
+          name = "docker-certs"
+          mount_path = "/home/gitlab-runner/"
+          medium = "Memory"
+        
+replicas: 2
+concurrent: 2
+
+gitlabUrl: https://192.168.1.76:9988/
+runnerToken: "L3cKXUo4U_iuV7pnEev8"
+serviceAccount:
+  create: false
+  name: "ns-gr-service-account"
+# image:
+#   registry: registry.gitlab.com
+#   repository: gitlab-org/gitlab-runner
+#   # tag: "17.7.0"
+#   pullPolicy: IfNotPresent
+
+
+# gitlabRunner:
+#   tlsVerify: false
+#   image:
+#     tag: "17.7.0"
+
+
+# gitlab-runner:
+#   volumes:
+#     - name: gitlab-ca-cert
+#       secret:
+#         secretName: gitlab-ca-cert
+#   volumeMounts:
+#     - name: gitlab-ca-cert
+#       mountPath: /etc/ssl/certs/
+#       readOnly: true
+# runners:
+#   config: |
+#     [[runners]]
+#       name = "my-runner"
+#       url = "https://192.168.1.76:9988/"
+#       token = "L3cKXUo4U_iuV7pnEev8"
+#       executor = "kubernetes"
+#       tls_verify = false  # Désactive la vérification TLS
+#       [runners.kubernetes]
+#         namespace = "{{.Release.Namespace}}"
+#         image = "alpine"
+#       [runners.cache]
+#         Type = "local"  # Utiliser un cache local
+#         Path = "/cache"  # Chemin du cache local
+#         Shared = true
+#       [runners.docker]
+#         tls_verify = false
+#       [runners.custom_build_dir]
+#         enabled = true
+#       [runners.kubernetes.volumes]
+#         [[runners.kubernetes.volumes.empty_dir]]
+#           name = "gitlab-runner-cache"
+#           mount_path = "/cache"
+#           medium = "Memory"
+
+# livenessProbe:
+#   exec:
+#     command:
+#       - "pgrep"
+#       - "gitlab-runner"
+#   initialDelaySeconds: 160
+#   periodSeconds: 130
+#   failureThreshold: 110
+
+
+# securityContext:
+#   allowPrivilegeEscalation: true  # Permet l'élévation des privilèges (ex: sudo, setuid)
+#   readOnlyRootFilesystem: false   # Autorise l'écriture partout dans le conteneur
+#   runAsNonRoot: false             # Permet d'exécuter le conteneur en root (UID 0)
+#   privileged: true                # Donne un accès complet au système hôte
+#   capabilities:
+#     add: ["ALL"]                  # Ajoute toutes les capacités Linux possibles
+#   seLinuxOptions:
+#     level: "s0:c123,c456"         # Désactive les restrictions SELinux (si activé)
+#   seccompProfile:
+#     type: Unconfined              # Désactive le profil Seccomp (sandboxing du noyau)
+#   fsGroup: 0                      # Définit le groupe d'accès aux fichiers comme root
+
+# initContainers:
+#   - name: fix-permissions
+#     image: busybox
+#     command: ["sh", "-c", "chmod -R 755 /etc/gitlab-runner"]
+#     securityContext:
+#       runAsUser: 0
+#       privileged: true
+#     volumeMounts:
+#       - mountPath: /etc/gitlab-runner
+#         name: gitlab-runner-config
+# volumes:
+#   - name: gitlab-runner-config
+#     emptyDir: {}
+# readinessProbe:
+#   exec:
+#     command:
+#       - "pgrep"
+#       - "gitlab-runner"
+#   initialDelaySeconds: 160
+#   periodSeconds: 130
+#   failureThreshold: 110
