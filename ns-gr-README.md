@@ -83,4 +83,22 @@ Voici une section qui explique ça en détail : [Création et vérification](Sec
 ```
 sudo kubectl create namespace ns-gr
 ```
+## Création du ServiceAccount, Role et RoleBinding pour GitLab Runner
+Créer un ServiceAccount, un Role et un RoleBinding dans le namespace ns-gr pour attribuer des permissions au GitLab Runner.
+  * Pour ça, j'utilise les fichiers manifest suivant :
+    1. [ServiceAccount](ServiceAccountRBAC/a_service-account.yaml) 
+    2. [Role ](ServiceAccountRBAC/b_role.yaml) 
+    3. [Rolebiding](ServiceAccountRBAC/c_role-biding.yaml) 
+    ```bash
+    sudo kubectl apply -f serviceAccount_Role_RoleBiding_RBAC.yaml
+    sudo kubectl apply -f serviceAccount_Role_RoleBiding_RBAC.yaml
+    sudo kubectl apply -f serviceAccount_Role_RoleBiding_RBAC.yaml
+    ```
 
+  * Ou bien, utiliser le fichier cobiné qui contient les diffèrent manifests précédents:
+    * [le fichier combiné ](ServiceAccountRBAC/ serviceAccount_Role_RoleBiding_RBAC.yaml)
+
+    ```bash
+    sudo kubectl apply -f serviceAccount_Role_RoleBiding_RBAC.yaml
+    ```
+![Description de l'image](assets/image1.png)
