@@ -36,7 +36,10 @@ Dans mon cas, j'ai utilisé un ConfigMap pour stocker les entrées de /etc/hosts
 Cela signifie que le fichier /etc/hosts du pod n’a pas été modifié directement. À la place, j'ai injecté un fichier contenant nos entrées d’hôte personnalisées, qui peut être lu par les conteneurs du pod comme l'exemple suivant .
 * Volume :[le fichier configMaps/custom-hosts](../configMaps/custom-hosts.yml) et [Définition du volume pour le certificat ](debug-test/test-pod.yaml#L29-L31)
 * Montage de volume : [Montage des hosts](debug-test/test-pod.yaml#L18-L20)
-
+```sh
+kubectl apply -f custom-hosts.yml
+```
+![custom-hosts configMap](../assets/image2.png)
 
 Contrairement à hostAliases, cette méthode nous permet de centraliser la gestion des entrées hosts via un ConfigMap, ce qui peut être utile pour des mises à jour dynamiques sans modifier le manifeste du pod.
 

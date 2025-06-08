@@ -3,7 +3,7 @@
 ```
 sudo kubectl get namespaces
 ```
-## Afficher mes liées au namespace ns-gr K8S
+## Afficher mes ressources liées au namespace ns-gr K8S
 ```
 sudo kubectl get all -n ns-gr
 sudo kubectl get secret,configmap -n ns-gr
@@ -88,17 +88,51 @@ Créer un ServiceAccount, un Role et un RoleBinding dans le namespace ns-gr pour
   * Pour ça, j'utilise les fichiers manifest suivant :
     1. [ServiceAccount](ServiceAccountRBAC/a_service-account.yaml) 
     2. [Role ](ServiceAccountRBAC/b_role.yaml) 
-    3. [Rolebiding](ServiceAccountRBAC/c_role-biding.yaml) 
-    ```bash
-    sudo kubectl apply -f serviceAccount_Role_RoleBiding_RBAC.yaml
-    sudo kubectl apply -f serviceAccount_Role_RoleBiding_RBAC.yaml
-    sudo kubectl apply -f serviceAccount_Role_RoleBiding_RBAC.yaml
+    3. [Rolebiding](ServiceAccountRBAC/c_role-biding.yaml)
+
+    ```sh
+    sudo kubectl apply -f a_service-account.yaml
+    sudo kubectl apply -f b_role.yaml
+    sudo kubectl apply -f c_role-biding.yaml
     ```
 
-  * Ou bien, utiliser le fichier cobiné qui contient les diffèrent manifests précédents:
+  * Ou bien, utiliser le fichier combiné qui contient les diffèrents manifests précédents:
     * [le fichier combiné ](ServiceAccountRBAC/ serviceAccount_Role_RoleBiding_RBAC.yaml)
 
-    ```bash
+    ```sh
     sudo kubectl apply -f serviceAccount_Role_RoleBiding_RBAC.yaml
     ```
 ![Description de l'image](assets/image1.png)
+
+## Installation et mise à jour de GitLab Runner
+```sh
+sudo helm install gitlab-runner-release \
+  gitlab/gitlab-runner \
+  -f ./values0.72.0.yaml \
+  -f ./values.overrideWithSecret.yaml \
+  -n ns-gr
+```
+Cette commande plantera si la release existe déjà. Dan ce cas , utiliser la commande suivante pour installation ou mise à jour.
+
+```sh
+sudo helm upgrade --install gitlab-runner-release \
+  gitlab/gitlab-runner \
+  -f ./values0.72.0.yaml \
+  -f ./values.overrideWithSecret.yaml \
+  -n ns-gr
+```
+
+Cette commande installe ou met à jour GitLab Runner dans le cluster Kubernetes, en utilisant le chart officiel gitlab/gitlab-runner de Helm.
+
+  * Si GitLab Runner est déjà installé dans le cluster sous le nom de release gitlab-runner-sab, la commande met à jour l'installation avec les nouvelles configurations.
+
+  * Si GitLab Runner n'est pas encore installé, la commande va l'installer.
+
+Les configurations de base sont fournies dans le fichier values0.72.0.yaml, et les configurations supplémentaires, comme les secrets et personnalisations, sont définies dans le fichier [values.overrideWithSecret.yaml](values.overrideWithSecret.yaml).
+
+Toutes ces ressources seront créées dans le namespace ns-gr.
+
+### Utilisation des fichiers de valeurs :
+  * **values0.72.0.yaml :** Ce fichier contient les paramètres par défaut pour le chart, comme la version du GitLab Runner et les configurations de base.
+
+  * **values.overrideWithSecret.yaml :** Ce fichier permet de personnaliser ou de surcharger certains paramètres, notamment les secrets (par exemple, les tokens de GitLab), ou d'autres configurations spécifiques à ton environnement.

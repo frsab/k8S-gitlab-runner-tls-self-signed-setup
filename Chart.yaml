@@ -1,0 +1,5 @@
+apiVersion: v2
+name: gitlab-runner
+description: A Helm chart for deploying GitLab Runner
+version: 0.1.0
+appVersion: 0.72.0
