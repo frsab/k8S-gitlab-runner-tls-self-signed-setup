@@ -93,8 +93,6 @@ In order for the GitLab pods and runners to resolve gitlab.optiplex3060 or other
 
 Create a ConfigMap with custom hosts:
 ```yaml
-Copier
-Modifier
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -108,8 +106,6 @@ data:
 Mount the custom hosts file in your pod spec:
 
 ```yaml
-Copier
-Modifier
 volumeMounts:
   - name: gitlab-tls-volume
     mountPath: /etc/gitlab-tls
